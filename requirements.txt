@@ -7,3 +7,4 @@ openai~=0.28.0
 python-dotenv~=1.0.1
 numpy~=1.26.4
 beautifulsoup4~=4.12.3
+streamlit_lottie~=0.0.5
