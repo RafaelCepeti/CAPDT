@@ -7,9 +7,10 @@ from dotenv import load_dotenv
 load_dotenv()
 token = os.getenv('API_TOKEN')
 
-# Verificar se o token foi carregado
+# 🚨 Debug: Verificar se a variável foi carregada corretamente
 if not token:
-    raise ValueError("Token da API não encontrado. Verifique se o arquivo .env está correto.")
+    print("❌ ERRO: API_TOKEN não foi encontrado! Verifique o arquivo .env ou as variáveis de ambiente.")
+    exit(1)
 
 # URL da API
 url = 'https://cepetiredcap.com.br/api/'
@@ -35,15 +36,14 @@ data = {
     'returnFormat': 'json'
 }
 
-# Caminhos para salvar os arquivos
+# Caminho para salvar os arquivos (usar /tmp/)
 save_path = "/tmp/dados.csv"
 error_path = "/tmp/erro.json"
 
 try:
-    # Solicitação à API
+    print("🔄 Enviando requisição para a API...")
     response = requests.post(url, data=data, timeout=200)
-
-    print('HTTP Status:', response.status_code)
+    print(f"🔍 Status HTTP: {response.status_code}")
 
     if response.status_code == 403:
         try:
@@ -51,39 +51,31 @@ try:
         except json.JSONDecodeError:
             error_message = "Erro desconhecido (resposta não era um JSON válido)."
 
-        print(f'Erro de permissão: {error_message}')
-
+        print(f"❌ Erro de permissão: {error_message}")
         with open(error_path, 'w', encoding='utf-8') as jsonfile:
             json.dump({'error': 'Erro de permissão', 'message': error_message}, jsonfile, ensure_ascii=False)
-
-        exit()
+        exit(1)
 
     elif response.status_code == 200:
-        # Salvar os dados no arquivo CSV
+        print("✅ Dados recebidos com sucesso! Salvando...")
         with open(save_path, 'w', newline='', encoding='utf-8') as csvfile:
             csvfile.write(response.text)
-        print(f'Dados salvos com sucesso em "{save_path}".')
+        print(f"📂 Dados salvos com sucesso em: {save_path}")
 
     else:
-        print('Falha na solicitação à API. Código de status HTTP:', response.status_code)
-
+        print(f"❌ Falha na requisição! Status HTTP: {response.status_code}")
         with open(error_path, 'w', encoding='utf-8') as jsonfile:
-            json.dump(
-                {
-                    'error': 'Falha na solicitação à API',
-                    'status_code': response.status_code,
-                    'message': response.text
-                },
-                jsonfile,
-                ensure_ascii=False
-            )
+            json.dump({'error': 'Falha na requisição', 'status_code': response.status_code, 'message': response.text}, jsonfile, ensure_ascii=False)
+        exit(1)
 
 except requests.exceptions.Timeout:
-    print('Ocorreu um timeout na solicitação.')
+    print("❌ Ocorreu um timeout na solicitação.")
     with open(error_path, 'w', encoding='utf-8') as jsonfile:
         json.dump({'error': 'Timeout', 'message': 'A solicitação excedeu o tempo limite'}, jsonfile, ensure_ascii=False)
+    exit(1)
 
 except requests.exceptions.RequestException as e:
-    print(f'Ocorreu um erro de conexão: {e}')
+    print(f"❌ Ocorreu um erro de conexão: {e}")
     with open(error_path, 'w', encoding='utf-8') as jsonfile:
         json.dump({'error': 'Erro de conexão', 'message': str(e)}, jsonfile, ensure_ascii=False)
+    exit(1)
