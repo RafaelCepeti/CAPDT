@@ -7,6 +7,8 @@ from home import mostrar_home
 from graficos import mostrar_graficos
 from auth import get_user_hospitals  # Importa a função para obter hospitais
 from mapeamento import mapeamento_hospital  # Importa o mapeamento de hospitais
+import subprocess
+import time
 
 # Caminhos dos arquivos
 dados_csv = "/tmp/dados.csv"
