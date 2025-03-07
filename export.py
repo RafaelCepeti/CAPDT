@@ -3,19 +3,13 @@ import requests
 import json
 from dotenv import load_dotenv
 
-# Carregar variáveis de ambiente
 load_dotenv()
+
 token = os.getenv('API_TOKEN')
-
-# 🚨 Debug: Verificar se a variável foi carregada corretamente
-if not token:
-    print("❌ ERRO: API_TOKEN não foi encontrado! Verifique o arquivo .env ou as variáveis de ambiente.")
-    exit(1)
-
-# URL da API
 url = 'https://cepetiredcap.com.br/api/'
+if not token:
+    raise ValueError("Token da API não encontrado nas variáveis de ambiente.")
 
-# Parâmetros da requisição
 data = {
     'token': token,
     'content': 'record',
@@ -36,46 +30,38 @@ data = {
     'returnFormat': 'json'
 }
 
-# Caminho para salvar os arquivos (usar /tmp/)
-save_path = "/tmp/dados.csv"
-error_path = "/tmp/erro.json"
-
 try:
-    print("🔄 Enviando requisição para a API...")
+    # Solicitação à API
     response = requests.post(url, data=data, timeout=200)
-    print(f"🔍 Status HTTP: {response.status_code}")
+
+    print('HTTP Status:', response.status_code)
 
     if response.status_code == 403:
-        try:
-            error_message = json.loads(response.text).get('error', 'Erro desconhecido.')
-        except json.JSONDecodeError:
-            error_message = "Erro desconhecido (resposta não era um JSON válido)."
+        error_message = json.loads(response.text).get('error', '')
+        print(f'Erro de permissão: {error_message}')
 
-        print(f"❌ Erro de permissão: {error_message}")
-        with open(error_path, 'w', encoding='utf-8') as jsonfile:
+        with open('erro.json', 'w', encoding='utf-8') as jsonfile:
             json.dump({'error': 'Erro de permissão', 'message': error_message}, jsonfile, ensure_ascii=False)
-        exit(1)
+        exit()
 
     elif response.status_code == 200:
-        print("✅ Dados recebidos com sucesso! Salvando...")
-        with open(save_path, 'w', newline='', encoding='utf-8') as csvfile:
+        with open('dados.csv', 'w', newline='', encoding='utf-8') as csvfile:
             csvfile.write(response.text)
-        print(f"📂 Dados salvos com sucesso em: {save_path}")
+        print('Dados salvos com sucesso em "dados.csv".')
 
     else:
-        print(f"❌ Falha na requisição! Status HTTP: {response.status_code}")
-        with open(error_path, 'w', encoding='utf-8') as jsonfile:
-            json.dump({'error': 'Falha na requisição', 'status_code': response.status_code, 'message': response.text}, jsonfile, ensure_ascii=False)
-        exit(1)
+        print('Falha na solicitação à API. Código de status HTTP:', response.status_code)
+        with open('erro.json', 'w', encoding='utf-8') as jsonfile:
+            json.dump(
+                {'error': 'Falha na solicitação à API', 'status_code': response.status_code, 'message': response.text},
+                jsonfile, ensure_ascii=False)
 
 except requests.exceptions.Timeout:
-    print("❌ Ocorreu um timeout na solicitação.")
-    with open(error_path, 'w', encoding='utf-8') as jsonfile:
+    print('Ocorreu um timeout na solicitação.')
+    with open('erro.json', 'w', encoding='utf-8') as jsonfile:
         json.dump({'error': 'Timeout', 'message': 'A solicitação excedeu o tempo limite'}, jsonfile, ensure_ascii=False)
-    exit(1)
 
 except requests.exceptions.RequestException as e:
-    print(f"❌ Ocorreu um erro de conexão: {e}")
-    with open(error_path, 'w', encoding='utf-8') as jsonfile:
+    print(f'Ocorreu um erro de conexão: {e}')
+    with open('erro.json', 'w', encoding='utf-8') as jsonfile:
         json.dump({'error': 'Erro de conexão', 'message': str(e)}, jsonfile, ensure_ascii=False)
-    exit(1)
