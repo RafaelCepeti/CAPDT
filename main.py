@@ -7,37 +7,7 @@ from home import mostrar_home
 from graficos import mostrar_graficos
 from auth import get_user_hospitals  # Importa a função para obter hospitais
 from mapeamento import mapeamento_hospital  # Importa o mapeamento de hospitais
-import subprocess
-import time
 
-# Caminhos dos arquivos
-dados_csv = "/tmp/dados.csv"
-data_work_csv = "/tmp/data_work.csv"
-
-# 🔄 **Executar export.py para baixar os dados**
-st.write("🔄 Obtendo dados da API...")
-subprocess.run(["python", "export.py"], check=True)
-
-# Esperar um pouco para garantir que o arquivo foi criado
-time.sleep(2)
-
-# 🚨 **Verificar se `dados.csv` foi gerado corretamente**
-if not os.path.exists(dados_csv):
-    st.error(f"❌ ERRO: {dados_csv} não foi gerado! Verifique `export.py`.")
-    st.stop()
-
-# 🔄 **Executar treatment.py para processar os dados**
-st.write("🔄 Processando dados...")
-subprocess.run(["python", "treatment.py"], check=True)
-
-# 🚨 **Verificar se `data_work.csv` foi gerado corretamente**
-if not os.path.exists(data_work_csv):
-    st.error(f"❌ ERRO: {data_work_csv} não foi gerado! Verifique `treatment.py`.")
-    st.stop()
-
-# ✅ **Carregar os dados após processamento**
-df = pd.read_csv(data_work_csv, encoding='utf-8')
-st.write("✅ Dados carregados com sucesso!")
 # Carregar as variáveis de ambiente do arquivo .env
 load_dotenv()
 
@@ -173,7 +143,7 @@ def mostrar_creditos():
 
 def main():
     if st.session_state.logged_in:
-        st.sidebar.image("assets/logo-qualidade.png", width=250)
+        st.sidebar.image("assets/logo-qualidade.png", use_container_width=True)
         st.sidebar.title("Menu")
         hospital_selecionado = st.sidebar.radio("Selecione uma página",
                                                 ["Home"] + st.session_state.hospitals + ["Créditos"])
