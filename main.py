@@ -8,6 +8,15 @@ from graficos import mostrar_graficos
 from auth import get_user_hospitals  # Importa a função para obter hospitais
 from mapeamento import mapeamento_hospital  # Importa o mapeamento de hospitais
 
+# Caminho correto do arquivo tratado
+data_work_csv = "/tmp/data_work.csv"
+
+if os.path.exists(data_work_csv):
+    df = pd.read_csv(data_work_csv, encoding='utf-8')
+else:
+    st.error(f"❌ ERRO: O arquivo {data_work_csv} não foi encontrado! Certifique-se de que os dados foram processados corretamente.")
+    st.stop()  # Para a execução do Streamlit se o arquivo não existir
+
 # Carregar as variáveis de ambiente do arquivo .env
 load_dotenv()
 
