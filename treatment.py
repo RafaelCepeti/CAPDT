@@ -1,11 +1,20 @@
-from datetime import datetime, timedelta
-import pandas as pd
 import os
+import pandas as pd
+from datetime import datetime, timedelta
 
+def renomear_colunas_e_salvar(arquivo_entrada, arquivo_saida, exclusao_colunas=None):
+    """Renomeia colunas, trata os dados e salva em um novo arquivo CSV."""
 
-def carregar_dados (caminho_arquivo):
-    """Carrega dados de um arquivo CSV."""
-    return pd.read_csv(caminho_arquivo)
+    # Novo caminho para os arquivos (pasta temporária no Streamlit Cloud)
+    caminho_entrada = os.path.join("/tmp", arquivo_entrada)
+    caminho_saida = os.path.join("/tmp", arquivo_saida)
+
+    # 🚨 Verificar se o arquivo de entrada existe antes de continuar
+    if not os.path.exists(caminho_entrada):
+        raise FileNotFoundError(f"Erro: O arquivo {caminho_entrada} não foi encontrado.")
+
+    # Carregar os dados
+    df = pd.read_csv(caminho_entrada)
 
 def transform (df, columns_to_fill):
     """Preenche valores vazios nas colunas especificadas usando forward fill."""
