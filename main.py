@@ -143,7 +143,7 @@ def mostrar_creditos():
 
 def main():
     if st.session_state.logged_in:
-        st.sidebar.image("assets/logo-qualidade.png", use_container_width=True)
+        st.sidebar.image("assets/logo-qualidade.png")
         st.sidebar.title("Menu")
         hospital_selecionado = st.sidebar.radio("Selecione uma página",
                                                 ["Home"] + st.session_state.hospitals + ["Créditos"])
