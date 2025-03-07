@@ -889,4 +889,5 @@ if __name__ == "__main__":
         "resumo_alta",
         "resumo_obito"
     ]
+    # Agora o código já lê e salva corretamente no `/tmp/`
     renomear_colunas_e_salvar('dados.csv', 'data_work.csv', colunas_excluir)
